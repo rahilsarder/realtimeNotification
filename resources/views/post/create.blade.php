@@ -1,4 +1,4 @@
-@extends('layouts.app')
-@section('content')
-<post-component :user="{{ $user }}" :post="{{ $posts }}"></post-component>
+@extends('post.index')
+@section('chat')
+<post-component :user="{{ $user }}" :post="{{ $posts }}" :roomid="'{{ $roomID }}'" :room="{{ $room }}"></post-component>
 @endsection

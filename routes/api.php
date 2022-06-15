@@ -18,5 +18,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/post', [App\Http\Controllers\PostController::class, 'create']);
-Route::get('/post', [App\Http\Controllers\PostController::class, 'apiIndex']);
+Route::prefix('chat')->group(function () {
+    Route::post('/', [App\Http\Controllers\PostController::class, 'create']);
+    Route::get('/{roomID}', [App\Http\Controllers\PostController::class, 'apiIndex']);
+});
+Route::get('/roomid/{roomID}', [App\Http\Controllers\PostController::class, 'apiRoomInfo']);

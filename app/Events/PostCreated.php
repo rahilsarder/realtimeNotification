@@ -22,11 +22,12 @@ class PostCreated implements ShouldBroadcast
      * @return void
      */
 
-    public $post, $user;
-    public function __construct(Post $post, User $user)
+    public $post, $user, $roomID;
+    public function __construct(Post $post, User $user, $roomID)
     {
         $this->post = $post;
         $this->user = $user;
+        $this->roomID = $roomID;
     }
 
     /**
@@ -36,6 +37,7 @@ class PostCreated implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('notification-channel');
+        // dd($this->roomID);
+        return new Channel('notification-channel-' . $this->roomID);
     }
 }

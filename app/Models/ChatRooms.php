@@ -11,5 +11,9 @@ class ChatRooms extends Model
 
     protected $guarded = [];
 
-    /// attributes = ['name', 'slug']
+    protected $cast = [
+        'chat_id' => 'string',
+    ];
+
+    /// attributes = ['chat_id','name', 'slug']
 }

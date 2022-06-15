@@ -5303,6 +5303,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vue_chat_scroll__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-chat-scroll */ "./node_modules/vue-chat-scroll/dist/vue-chat-scroll.js");
+/* harmony import */ var vue_chat_scroll__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_chat_scroll__WEBPACK_IMPORTED_MODULE_1__);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -5345,23 +5347,68 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ["user", "post"],
+  props: ["user", "post", "roomid", "room"],
+  components: {
+    VueChatScroll: (vue_chat_scroll__WEBPACK_IMPORTED_MODULE_1___default())
+  },
   data: function data() {
     return {
       comment: {
         title: "",
         user_id: this.user.id
       },
-      apiComment: []
+      apiComment: [],
+      roomInfo: {}
     };
   },
   methods: {
     addPost: function addPost() {
       var _this = this;
 
-      axios__WEBPACK_IMPORTED_MODULE_0___default().post("/post", this.comment).then(function (response) {
+      axios__WEBPACK_IMPORTED_MODULE_0___default().post("/chat/".concat(this.roomid), this.comment).then(function (response) {
         _this.comment = {
           title: ""
         };
@@ -5371,8 +5418,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   created: function created() {
     var _this2 = this;
 
-    console.log(this.userId);
-    Echo.channel("notification-channel").listen("PostCreated", function (post) {
+    console.log(this.user);
+    Echo.channel("notification-channel-" + this.roomid).listen("PostCreated", function (post) {
+      console.log(post);
       post.post = _objectSpread(_objectSpread({}, post.post), {}, {
         user: post.user
       });
@@ -5380,8 +5428,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       _this2.apiComment.push(post.post);
     });
-    axios__WEBPACK_IMPORTED_MODULE_0___default().get("/api/post").then(function (response) {
+    axios__WEBPACK_IMPORTED_MODULE_0___default().get("/api/chat/" + this.roomid).then(function (response) {
       _this2.apiComment = response.data;
+    });
+    axios__WEBPACK_IMPORTED_MODULE_0___default().get("/api/roomid/" + this.roomid).then(function (response) {
+      _this2.roomInfo = response.data;
     });
   }
 });
@@ -34323,6 +34374,99 @@ runtime.setup(pusher_Pusher);
 
 /***/ }),
 
+/***/ "./node_modules/vue-chat-scroll/dist/vue-chat-scroll.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/vue-chat-scroll/dist/vue-chat-scroll.js ***!
+  \**************************************************************/
+/***/ (function(module) {
+
+(function (global, factory) {
+   true ? module.exports = factory() :
+  0;
+}(this, (function () { 'use strict';
+
+  /**
+  * @name VueJS vChatScroll (vue-chat-scroll)
+  * @description Monitors an element and scrolls to the bottom if a new child is added
+  * @author Theodore Messinezis <theo@theomessin.com>
+  * @file v-chat-scroll  directive definition
+  */
+  var scrollToBottom = function scrollToBottom(el, smooth) {
+    if (typeof el.scroll === "function") {
+      el.scroll({
+        top: el.scrollHeight,
+        behavior: smooth ? 'smooth' : 'instant'
+      });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
+  };
+
+  var vChatScroll = {
+    bind: function bind(el, binding) {
+      var scrolled = false;
+      el.addEventListener('scroll', function (e) {
+        scrolled = el.scrollTop + el.clientHeight + 1 < el.scrollHeight;
+
+        if (scrolled && el.scrollTop === 0) {
+          el.dispatchEvent(new Event("v-chat-scroll-top-reached"));
+        }
+      });
+      new MutationObserver(function (e) {
+        var config = binding.value || {};
+        if (config.enabled === false) return;
+        var pause = config.always === false && scrolled;
+        var addedNodes = e[e.length - 1].addedNodes.length;
+        var removedNodes = e[e.length - 1].removedNodes.length;
+
+        if (config.scrollonremoved) {
+          if (pause || addedNodes != 1 && removedNodes != 1) return;
+        } else {
+          if (pause || addedNodes != 1) return;
+        }
+
+        var smooth = config.smooth;
+        var loadingRemoved = !addedNodes && removedNodes === 1;
+
+        if (loadingRemoved && config.scrollonremoved && 'smoothonremoved' in config) {
+          smooth = config.smoothonremoved;
+        }
+
+        scrollToBottom(el, smooth);
+      }).observe(el, {
+        childList: true,
+        subtree: true
+      });
+    },
+    inserted: function inserted(el, binding) {
+      var config = binding.value || {};
+      scrollToBottom(el, config.notSmoothOnInit ? false : config.smooth);
+    }
+  };
+
+  /**
+  * @name VueJS vChatScroll (vue-chat-scroll)
+  * @description Monitors an element and scrolls to the bottom if a new child is added
+  * @author Theodore Messinezis <theo@theomessin.com>
+  * @file vue-chat-scroll plugin definition
+  */
+  var VueChatScroll = {
+    install: function install(Vue, options) {
+      Vue.directive('chat-scroll', vChatScroll);
+    }
+  };
+
+  if (typeof window !== 'undefined' && window.Vue) {
+    window.Vue.use(VueChatScroll);
+  }
+
+  return VueChatScroll;
+
+})));
+
+
+/***/ }),
+
 /***/ "./resources/js/components/ExampleComponent.vue":
 /*!******************************************************!*\
   !*** ./resources/js/components/ExampleComponent.vue ***!
@@ -34531,66 +34675,132 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "container" }, [
-    _c("div", { staticClass: "row justify-content-center" }, [
-      _c("div", { staticClass: "col md-7" }, [
-        _c("div", { staticClass: "card" }, [
-          _c("div", { staticClass: "card-header" }, [
-            _vm._v("Create new Post"),
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "card-body" }, [
-            _c("p", { attrs: { id: "success" } }),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "container" },
-              _vm._l(_vm.apiComment, function (chat) {
-                return _c("ul", { key: chat.id }, [
-                  _c("li", [
-                    _c("b", [_vm._v(_vm._s(chat.user.name))]),
-                    _vm._v(
-                      "\n                                " +
-                        _vm._s(chat.title) +
-                        "\n                            "
-                    ),
+  return _c("div", { staticClass: "col-7 px-0" }, [
+    _c("div", { staticClass: "card" }, [
+      _c("div", { staticClass: "card-header" }, [
+        _c("h3", { staticClass: "card-title" }, [
+          _vm._v(_vm._s(_vm.room.name)),
+        ]),
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          directives: [{ name: "chat-scroll", rawName: "v-chat-scroll" }],
+          staticClass: "px-4 py-5 chat-box bg-white",
+        },
+        _vm._l(_vm.apiComment, function (chat) {
+          return _c("div", { key: chat.id }, [
+            chat.user.id !== _vm.user.id
+              ? _c("div", [
+                  _c("div", { staticClass: "media w-50 mb-3" }, [
+                    _c("div", { staticClass: "media-body ml-3" }, [
+                      _c("p", { staticClass: "text-small mb-0 text-muted" }, [
+                        _c("span", { staticClass: "text-muted" }, [
+                          _c("b", [_vm._v(_vm._s(chat.user.name))]),
+                        ]),
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "bg-light rounded py-2 px-3 mb-2" },
+                        [
+                          _c(
+                            "p",
+                            { staticClass: "text-small mb-0 text-muted" },
+                            [
+                              _vm._v(
+                                "\n                                    " +
+                                  _vm._s(chat.title) +
+                                  "\n                                "
+                              ),
+                            ]
+                          ),
+                        ]
+                      ),
+                    ]),
                   ]),
                 ])
-              }),
-              0
-            ),
-            _vm._v(" "),
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.comment.title,
-                  expression: "comment.title",
-                },
-              ],
-              attrs: { type: "text", name: "title" },
-              domProps: { value: _vm.comment.title },
-              on: {
-                input: function ($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.$set(_vm.comment, "title", $event.target.value)
-                },
-              },
-            }),
-            _vm._v(" "),
-            _c(
-              "button",
-              {
-                staticClass: "btn btn-primary",
-                attrs: { type: "submit" },
-                on: { click: _vm.addPost },
-              },
-              [_vm._v("\n                        Submit\n                    ")]
-            ),
-          ]),
+              : _c("div", [
+                  _c("div", { staticClass: "media w-50 ms-auto mb-3" }, [
+                    _c("div", { staticClass: "media-body" }, [
+                      _c("p", { staticClass: "text-small mb-0 text-muted" }, [
+                        _c("span", { staticClass: "text-muted" }, [
+                          _vm._v(_vm._s(chat.user.name)),
+                        ]),
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "bg-primary rounded py-2 px-3 mb-2" },
+                        [
+                          _c(
+                            "p",
+                            { staticClass: "text-small mb-0 text-white" },
+                            [
+                              _vm._v(
+                                "\n                                    " +
+                                  _vm._s(chat.title) +
+                                  "\n                                "
+                              ),
+                            ]
+                          ),
+                        ]
+                      ),
+                    ]),
+                  ]),
+                ]),
+          ])
+        }),
+        0
+      ),
+      _vm._v(" "),
+      _c("div", { staticClass: "input-group" }, [
+        _c("input", {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.comment.title,
+              expression: "comment.title",
+            },
+          ],
+          staticClass: "form-control rounded-0 border-0 py-4 bg-light",
+          attrs: {
+            type: "text",
+            placeholder: "Type a message",
+            "aria-describedby": "button-addon2",
+          },
+          domProps: { value: _vm.comment.title },
+          on: {
+            keyup: function ($event) {
+              if (
+                !$event.type.indexOf("key") &&
+                _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+              ) {
+                return null
+              }
+              return _vm.addPost.apply(null, arguments)
+            },
+            input: function ($event) {
+              if ($event.target.composing) {
+                return
+              }
+              _vm.$set(_vm.comment, "title", $event.target.value)
+            },
+          },
+        }),
+        _vm._v(" "),
+        _c("div", { staticClass: "input-group-append" }, [
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-link",
+              attrs: { id: "button-addon2", type: "submit" },
+              on: { click: _vm.addPost },
+            },
+            [_c("i", { staticClass: "fa fa-paper-plane big" })]
+          ),
         ]),
       ]),
     ]),

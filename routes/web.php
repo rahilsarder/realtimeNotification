@@ -3,7 +3,7 @@
 use App\Events\PostCreated;
 use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Str;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -23,12 +23,19 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/post', [PostController::class, 'index'])->name('post.index');
-    Route::post('/post', [PostController::class, 'create'])->name('post.create');
+Route::middleware('auth')->prefix('chat')->group(function () {
+    Route::get('/', [PostController::class, 'index'])->name('chat.index');
+    Route::post('/createRoom', [PostController::class, 'createRoom'])->name('chat.createRoom');
+    Route::get('/{roomID}', [PostController::class, 'create'])->name('chat.index');
+    Route::post('/{roomID}', [PostController::class, 'store'])->name('chat.create');
 });
 
 Route::get('/test', function () {
     event(new PostCreated('Hello World'));
     return 'Fired';
+});
+
+
+Route::get('uuid', function () {
+    return Str::uuid();
 });
