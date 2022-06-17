@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\ChatRooms;
+use App\Models\ChatRoomsUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -50,8 +51,6 @@ class PostController extends Controller
         return Post::where('chat_room_id', $roomID)->with('user')->get();
     }
 
-
-
     // Get Room Info from Room ID
 
     public function apiRoomInfo($roomID)
@@ -94,6 +93,13 @@ class PostController extends Controller
             response()->json([
                 'message' => 'Post created successfully',
             ]) : response()->json(['message' => 'Post not created'], 500);
+    }
+
+
+
+    public function chatUsers($roomID)
+    {
+        return $chatRoomUsers = ChatRoomsUsers::where('chat_room_id', $roomID);
     }
 
     /**

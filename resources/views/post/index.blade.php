@@ -40,7 +40,7 @@
                         @endforelse
                     </div>
                 </div>
-                <form action="/chat/createRoom" method="POST" class="d-flex justify-content-between ">
+                <form action="/chat/createRoom" method="POST" class="d-flex justify-content-between">
                     @csrf
                     <input type="text" name="name" placeholder="Room Name" class="w-100 form-control">
                     <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i></button>
@@ -50,19 +50,6 @@
         @yield('chat')
     </div>
 </div>
-
-{{-- <form action="/post/createRoom" method="POST" class="d-flex justify-content-between">
-                    @csrf
-                    <input type="text" name="name" placeholder="Room Name" class="w-100 form-control">
-                    <input type="submit" value="Create Room" class="btn btn-primary">
-                </form>  --}}
-
-
-
-                {{-- @forelse ($chat_rooms as $room)
-                @empty
-                <h1 class="alert">Don't have any rooms yet? Try making one!</h1>
-                @endforelse --}}
 @endsection
 
 
